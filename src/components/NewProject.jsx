@@ -27,6 +27,7 @@ export default function NewProject({onSaveNewProject, onCancelNewProject}) {
       title: enteredTitle,
       description: enteredDescription,
       dueDate: enteredDueDate,
+      tasks: [],
     }
 
     onSaveNewProject(project);
