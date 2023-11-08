@@ -1,5 +1,4 @@
-import { createContext, useState } from "react"
-
+import { createContext, useState } from "react";
 
 export const ProjectsContext = createContext({
   selectedProjectId: undefined,
@@ -14,14 +13,39 @@ export const ProjectsContext = createContext({
   deleteTask: () => {},
 });
 
+const storageKey = {
+  projects: 'myProjects',
+  tasks: 'myTasks',
+  id: 'selectedProjectId',
+}
+
 export default function ProjectsContextProvider({children}) {
-  const [projectsState, setProjectsState] = useState({
+  const defaultProjectsState = {
     selectedProjectId: undefined,
     projects: [],
     tasks: [],
-  });
+  };
+
+  if (localStorage.getItem(storageKey.projects)) {
+    const projects = JSON.parse(localStorage.getItem(storageKey.projects));
+    defaultProjectsState.projects = projects.length > 0 ? [...projects] : [];
+  }
+
+  if (localStorage.getItem(storageKey.tasks)) {
+    const tasks = JSON.parse(localStorage.getItem(storageKey.tasks));
+    defaultProjectsState.tasks = tasks.length > 0 ? [...tasks] : [];
+  }
+
+  if (localStorage.getItem(storageKey.id) || localStorage.getItem(storageKey.id) === undefined) {
+    if (localStorage.getItem(storageKey.id) === 'undefined') defaultProjectsState.selectedProjectId = undefined;
+    else defaultProjectsState.selectedProjectId = JSON.parse(localStorage.getItem(storageKey.id));
+  }
+
+  const [projectsState, setProjectsState] = useState(defaultProjectsState);
 
   function handleStartAddProject() {
+    localStorage.setItem(storageKey.id, JSON.stringify(null));
+
     setProjectsState((prev) => {
       return {
         ...prev,
@@ -37,15 +61,22 @@ export default function ProjectsContextProvider({children}) {
     }
 
     setProjectsState((prev) => {
-      return {
+      const newState = {
         ...prev,
         projects: [...prev.projects, newProject],
         selectedProjectId: newProject.id,
       }
+
+      localStorage.setItem(storageKey.projects, JSON.stringify([...newState.projects]));
+      localStorage.setItem(storageKey.id, JSON.stringify(newState.selectedProjectId));
+
+      return newState;
     })
   }
 
   function handleCancelNewPr() {
+    localStorage.setItem(storageKey.id, JSON.stringify(undefined));
+
     setProjectsState((prev) => {
       return {
         ...prev,
@@ -55,6 +86,8 @@ export default function ProjectsContextProvider({children}) {
   }
 
   function handleSelectProject(projectId) {
+    localStorage.setItem(storageKey.id, JSON.stringify(projectId));
+
     setProjectsState((prev) => {
       return {
         ...prev, 
@@ -64,13 +97,19 @@ export default function ProjectsContextProvider({children}) {
   }
 
   function handleDeleteProject() {
+    localStorage.setItem(storageKey.id, JSON.stringify(undefined));
+
     setProjectsState((prev) => {
-      return {
+      const newState = {
         ...prev,
         selectedProjectId: undefined,
         projects: prev.projects.filter((project) => project.id !== projectsState.selectedProjectId),
         tasks: prev.tasks.filter((task) => task.projectId !== projectsState.selectedProjectId),
       }
+
+      localStorage.setItem(storageKey.projects, JSON.stringify([...newState.projects]));
+
+      return newState;
     })
   }
 
@@ -84,19 +123,25 @@ export default function ProjectsContextProvider({children}) {
         projectId: prev.selectedProjectId,
       }
 
-      return {
+      const newState = {
         ...prev,
         tasks: [...prev.tasks, newTask],
       }
+
+      localStorage.setItem(storageKey.tasks, JSON.stringify([...newState.tasks]));
+      return newState;
     })
   }
 
   function handleDeleteTask(taskId) {
     setProjectsState((prev) => {
-      return {
+      const newState = {
         ...prev,
         tasks: prev.tasks.filter((task) => task.id !== taskId),
       }
+
+      localStorage.setItem(storageKey.tasks, JSON.stringify([...newState.tasks]));
+      return newState;
     })
   }
 
