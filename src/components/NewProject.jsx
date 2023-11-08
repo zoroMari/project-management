@@ -1,13 +1,15 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import Input from './Input';
 import Modal from './Modal';
+import { ProjectsContext } from '../store/projects-context';
 
 
-export default function NewProject({onSaveNewProject, onCancelNewProject}) {
+export default function NewProject() {
   const title = useRef();
   const description = useRef();
   const dueDate = useRef();
   const modal = useRef();
+  const { saveNewProject, cancelNewProject } = useContext(ProjectsContext);
 
   function handleSave() {
     const enteredTitle = title.current.value;
@@ -30,7 +32,7 @@ export default function NewProject({onSaveNewProject, onCancelNewProject}) {
       tasks: [],
     }
 
-    onSaveNewProject(project);
+    saveNewProject(project);
   }
 
   return (
@@ -45,7 +47,7 @@ export default function NewProject({onSaveNewProject, onCancelNewProject}) {
           <li>
             <button 
               className="text-stone-800 hover:text-stone-950"
-              onClick={onCancelNewProject}
+              onClick={cancelNewProject}
             >
               Cancel
             </button>
