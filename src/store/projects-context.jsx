@@ -13,38 +13,24 @@ export const ProjectsContext = createContext({
   deleteTask: () => {},
 });
 
-const storageKey = {
-  projects: 'myProjects',
-  tasks: 'myTasks',
-  id: 'selectedProjectId',
-}
+const storageKey = 'projectsStorage';
 
 export default function ProjectsContextProvider({children}) {
-  const defaultProjectsState = {
+  let defaultProjectsState = {
     selectedProjectId: undefined,
     projects: [],
     tasks: [],
   };
 
-  if (localStorage.getItem(storageKey.projects)) {
-    const projects = JSON.parse(localStorage.getItem(storageKey.projects));
-    defaultProjectsState.projects = projects.length > 0 ? [...projects] : [];
-  }
-
-  if (localStorage.getItem(storageKey.tasks)) {
-    const tasks = JSON.parse(localStorage.getItem(storageKey.tasks));
-    defaultProjectsState.tasks = tasks.length > 0 ? [...tasks] : [];
-  }
-
-  if (localStorage.getItem(storageKey.id) || localStorage.getItem(storageKey.id) === undefined) {
-    if (localStorage.getItem(storageKey.id) === 'undefined') defaultProjectsState.selectedProjectId = undefined;
-    else defaultProjectsState.selectedProjectId = JSON.parse(localStorage.getItem(storageKey.id));
+  if (localStorage.getItem(storageKey)) {
+    const storageState = JSON.parse(localStorage.getItem(storageKey));
+    defaultProjectsState = {...storageState};
   }
 
   const [projectsState, setProjectsState] = useState(defaultProjectsState);
 
   function handleStartAddProject() {
-    localStorage.setItem(storageKey.id, JSON.stringify(null));
+    localStorage.setItem(storageKey, JSON.stringify({...projectsState, selectedProjectId: null,}));
 
     setProjectsState((prev) => {
       return {
@@ -67,15 +53,13 @@ export default function ProjectsContextProvider({children}) {
         selectedProjectId: newProject.id,
       }
 
-      localStorage.setItem(storageKey.projects, JSON.stringify([...newState.projects]));
-      localStorage.setItem(storageKey.id, JSON.stringify(newState.selectedProjectId));
-
+      localStorage.setItem(storageKey, JSON.stringify({...newState}));
       return newState;
     })
   }
 
   function handleCancelNewPr() {
-    localStorage.setItem(storageKey.id, JSON.stringify(undefined));
+    localStorage.setItem(storageKey, JSON.stringify({...projectsState, selectedProjectId: undefined,}));
 
     setProjectsState((prev) => {
       return {
@@ -86,7 +70,7 @@ export default function ProjectsContextProvider({children}) {
   }
 
   function handleSelectProject(projectId) {
-    localStorage.setItem(storageKey.id, JSON.stringify(projectId));
+    localStorage.setItem(storageKey, JSON.stringify({...projectsState, selectedProjectId: projectId,}));
 
     setProjectsState((prev) => {
       return {
@@ -97,7 +81,7 @@ export default function ProjectsContextProvider({children}) {
   }
 
   function handleDeleteProject() {
-    localStorage.setItem(storageKey.id, JSON.stringify(undefined));
+    localStorage.setItem(storageKey, JSON.stringify({...projectsState, selectedProjectId: undefined,}));
 
     setProjectsState((prev) => {
       const newState = {
@@ -107,8 +91,7 @@ export default function ProjectsContextProvider({children}) {
         tasks: prev.tasks.filter((task) => task.projectId !== projectsState.selectedProjectId),
       }
 
-      localStorage.setItem(storageKey.projects, JSON.stringify([...newState.projects]));
-
+      localStorage.setItem(storageKey, JSON.stringify({...newState}));
       return newState;
     })
   }
@@ -128,7 +111,7 @@ export default function ProjectsContextProvider({children}) {
         tasks: [...prev.tasks, newTask],
       }
 
-      localStorage.setItem(storageKey.tasks, JSON.stringify([...newState.tasks]));
+      localStorage.setItem(storageKey, JSON.stringify({...newState}));
       return newState;
     })
   }
@@ -140,7 +123,7 @@ export default function ProjectsContextProvider({children}) {
         tasks: prev.tasks.filter((task) => task.id !== taskId),
       }
 
-      localStorage.setItem(storageKey.tasks, JSON.stringify([...newState.tasks]));
+      localStorage.setItem(storageKey, JSON.stringify({...newState}));
       return newState;
     })
   }
