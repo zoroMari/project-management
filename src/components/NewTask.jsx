@@ -1,11 +1,14 @@
-import { useRef } from "react";
+import { useContext, useRef } from "react";
+import { ProjectsContext } from "../store/projects-context";
 
-export default function NewTask({ onAddTask }) {
+export default function NewTask() {
   const taskInput = useRef();
+  const { addTask } = useContext(ProjectsContext);
+
   function handleAddTask() {
     if (taskInput.current.value.trim() === '') return;
 
-    onAddTask(taskInput.current.value);
+    addTask(taskInput.current.value);
     taskInput.current.value = '';
   }
 
