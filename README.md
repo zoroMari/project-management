@@ -1,4 +1,4 @@
-# Stop-timer-game
+# Project-management
 
 It is a simple App created with React.
 
